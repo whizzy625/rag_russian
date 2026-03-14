@@ -1,0 +1,9 @@
+langchain
+langchain-core
+langchain-community
+langchain-text-splitters
+faiss-cpu
+pymupdf
+reportlab
+sentence-transformers
+openai
