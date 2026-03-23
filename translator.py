@@ -43,7 +43,15 @@ def save_checkpoint(checkpoint_path, translated_chunks, total):
 
 def _is_data_inspection_error(exc: Exception) -> bool:
     msg = str(exc).lower()
-    return "data_inspection_failed" in msg or "datainspectionfailed" in msg
+    signals = [
+        "data_inspection_failed",
+        "datainspectionfailed",
+        "inappropriate-content",
+        "inappropriate content",
+        "input data may contain inappropriate content",
+        "error-code#inappropriate-content",
+    ]
+    return any(flag in msg for flag in signals)
 
 
 def _safe_fallback_translate(text: str) -> str:
@@ -58,7 +66,7 @@ def _safe_fallback_translate(text: str) -> str:
     return llm_chat(prompt, temperature=0.1)
 
 
-def translate_chunks(chunks, stores, file_label="", checkpoint_path=None):
+def translate_chunks(chunks, stores, file_label="", checkpoint_path=None, progress_callback=None):
 
     term_store = stores.get("terms") if stores else None
     memory_store = stores.get("memory") if stores else None
@@ -122,6 +130,14 @@ def translate_chunks(chunks, stores, file_label="", checkpoint_path=None):
         result.append(zh)
         if checkpoint_path:
             save_checkpoint(checkpoint_path, result, total)
+        if progress_callback:
+            progress_callback(
+                {
+                    "file": file_label or "",
+                    "done_chunks": i,
+                    "total_chunks": total,
+                }
+            )
 
         if file_label:
             print(f"[{file_label}] translated chunk {i}/{total}")

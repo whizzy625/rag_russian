@@ -7,3 +7,6 @@ pymupdf
 reportlab
 sentence-transformers
 openai
+fastapi
+uvicorn
+python-multipart
